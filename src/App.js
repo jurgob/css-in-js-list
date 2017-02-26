@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-// import logo from './logo.svg';
+import Logo from './Logo';
 // import './App.css';
 
 class App extends Component {
@@ -7,6 +7,7 @@ class App extends Component {
     return (
       <div className="App">
         <div className="App-header">
+          <Logo />
           <h2>Welcome to React yollo</h2>
         </div>
         <p className="App-intro">
