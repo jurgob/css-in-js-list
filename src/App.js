@@ -1,6 +1,28 @@
 import React, { Component } from 'react';
 // import Logo from './Logo';
 // import './App.css';
+var limit = require("simple-rate-limiter");
+
+
+function funcFactory(func, to=2, per=1000){
+  var _f = (resolve, fail, ...args) => {
+    return func(...args)
+      .then(res =>resolve(res))
+      .catch(err => fail(err))
+  }
+  var resolvePromise = limit(_f).to(to).per(per);
+  return (...args) => {
+    return new Promise((resolve, fail) => {
+        resolvePromise(resolve, fail, ...args)
+    })
+
+  }
+}
+
+var _fetch = funcFactory(fetch, 5, 1000)
+
+
+window._fetch = _fetch
 
 /*
 get this list from Michele Bertoli css-in-js page:
@@ -8,6 +30,8 @@ https://github.com/MicheleBertoli/css-in-js
 with:
 Array.prototype.map.call(document.querySelectorAll('#readme table tbody a'), (a) => a.href.replace('https://github.com/', '')  ).map(e => `"${e}"` ).join(",\n")
 */
+
+
 
 const REPOS_TITLES = [
   "Khan/aphrodite",
@@ -61,7 +85,7 @@ const REPOS_TITLES = [
 ]
 
 
-const getRepoInfo = (repo) => fetch(`https://api.github.com/repos/${repo}`)
+const getRepoInfo = (repo) => _fetch(`https://api.github.com/repos/${repo}`)
   .then((res) => res.json() )
 
 class App extends Component {
@@ -80,19 +104,25 @@ class App extends Component {
   componentDidMount(){
     // const repo = 'styled-components/styled-components'
       const {reposTitles} = this.state;
-      Promise
-        .all(reposTitles.map(repo => getRepoInfo(repo)))
-        .then(repos => {
-          this.setState({
-            reposResponse:repos
+      reposTitles
+        .forEach(repo => {
+          getRepoInfo(repo)
+            .then(repo => {
+              const {reposInfo} = this.state;
+              console.log('repo' ,repo)
+              const {full_name} = repo
+              const newReposInfo = {
+                ...reposInfo,
+                [full_name]: repo
+              }
+              console.log('newReposInfo' ,newReposInfo)
+              this.setState({
+                reposInfo:newReposInfo
+              })
           })
-          // repos.map((res) => this.setState({
-          //     reposInfo:{
-          //       ...reposInfo,
-          //       [res.full_name]:res
-          //     }
-          //   }))
         })
+
+
   }
 
   render() {
@@ -103,7 +133,7 @@ class App extends Component {
           <h2>List of React Css Library</h2>
         </div>
         <div>
-            Based from the <a href="https://github.com/MicheleBertoli/css-in-js">Michele Bertoli css-in-js list</a>
+            Based from the <a href="https://agithub.com/MicheleBertoli/css-in-js">Michele Bertoli css-in-js list</a>
         </div>
         <div className="App-intro">
           <table style={{borderSpacing:"15px"}}  >
@@ -115,7 +145,7 @@ class App extends Component {
               </tr>
             </thead>
             <tbody>
-              {this.state.reposResponse
+              {Object.values(this.state.reposInfo)
                 .sort((a,b) => {
                   console.log('sort', a.stargazers_count < b.stargazers_count)
                   return  b.stargazers_count - a.stargazers_count
