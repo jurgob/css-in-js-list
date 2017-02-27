@@ -19,7 +19,7 @@ function funcFactory(func, to=2, per=1000){
   }
 }
 
-var _fetch = funcFactory(fetch, 5, 1000)
+var _fetch = funcFactory(fetch, 2, 1000)
 
 
 window._fetch = _fetch
