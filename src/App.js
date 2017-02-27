@@ -133,7 +133,7 @@ class App extends Component {
           <h2>List of React Css Library</h2>
         </div>
         <div>
-            Based from the <a href="https://agithub.com/MicheleBertoli/css-in-js">Michele Bertoli css-in-js list</a>
+            Based on <a href="https://agithub.com/MicheleBertoli/css-in-js">Michele Bertoli css-in-js list</a>
         </div>
         <div className="App-intro">
           <table style={{borderSpacing:"15px"}}  >
