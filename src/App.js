@@ -1,4 +1,11 @@
 import React, { Component } from 'react';
+import ReactGA from 'react-ga';
+ReactGA.initialize('UA-93494363-1');
+function logPageView() {
+  ReactGA.set({ page: window.location.pathname });
+  ReactGA.pageview(window.location.pathname);
+}
+
 // import Logo from './Logo';
 // import './App.css';
 var limit = require("simple-rate-limiter");
@@ -102,6 +109,7 @@ class App extends Component {
   }
 
   componentDidMount(){
+    logPageView()
     // const repo = 'styled-components/styled-components'
       const {reposTitles} = this.state;
       reposTitles
