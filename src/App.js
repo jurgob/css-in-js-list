@@ -112,21 +112,27 @@ class App extends Component {
     logPageView()
     // const repo = 'styled-components/styled-components'
       const {reposTitles} = this.state;
+      const reposInfo = localStorage.getItem('reposInfo')
+      if(reposInfo)
+        this.setState({
+          reposInfo:JSON.parse(reposInfo)
+        })
+
+
       reposTitles
         .forEach(repo => {
           getRepoInfo(repo)
             .then(repo => {
               const {reposInfo} = this.state;
-              console.log('repo' ,repo)
               const {full_name} = repo
               const newReposInfo = {
                 ...reposInfo,
                 [full_name]: repo
               }
-              console.log('newReposInfo' ,newReposInfo)
               this.setState({
                 reposInfo:newReposInfo
               })
+              localStorage.setItem('reposInfo', JSON.stringify(reposInfo))
           })
         })
 
@@ -155,7 +161,6 @@ class App extends Component {
             <tbody>
               {Object.values(this.state.reposInfo)
                 .sort((a,b) => {
-                  console.log('sort', a.stargazers_count < b.stargazers_count)
                   return  b.stargazers_count - a.stargazers_count
                 })
                 .map(repo => <Repo key={repo.full_name}  repo={repo} />   )}
