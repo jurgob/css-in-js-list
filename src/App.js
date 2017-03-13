@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {Table} from 'reactable';
 import ReactGA from 'react-ga';
 ReactGA.initialize('UA-93494363-1');
 function logPageView() {
@@ -113,85 +114,66 @@ class App extends Component {
     // const repo = 'styled-components/styled-components'
       const {reposTitles} = this.state;
       const reposInfo = localStorage.getItem('reposInfo')
+
       if(reposInfo)
         this.setState({
           reposInfo:JSON.parse(reposInfo)
         })
 
+      const fetchRepos = true
 
-      reposTitles
-        .forEach(repo => {
-          getRepoInfo(repo)
-            .then(repo => {
-              const {reposInfo} = this.state;
-              const {full_name} = repo
-              const newReposInfo = {
-                ...reposInfo,
-                [full_name]: repo
-              }
-              this.setState({
-                reposInfo:newReposInfo
-              })
-              localStorage.setItem('reposInfo', JSON.stringify(reposInfo))
+      if(fetchRepos)
+        reposTitles
+          .forEach(repo => {
+            getRepoInfo(repo)
+              .then(repo => {
+                const {reposInfo} = this.state;
+                const {full_name} = repo
+                const newReposInfo = {
+                  ...reposInfo,
+                  [full_name]: repo
+                }
+                this.setState({
+                  reposInfo:newReposInfo
+                })
+                localStorage.setItem('reposInfo', JSON.stringify(reposInfo))
+            })
           })
-        })
 
 
   }
 
   render() {
+
+    const tableData = Object.values(this.state.reposInfo)
+      .filter(repo => !!repo.name)
+      .sort((a,b) => {
+        return  b.stargazers_count - a.stargazers_count
+      })
+      .map(repo => ({
+        Avatar: <img height="40px" src={repo.owner && repo.owner.avatar_url} role="presentation" />,
+        Name: <a href={repo.html_url}>{repo.name}</a>,
+        Stars: repo.stargazers_count,
+        Issues: repo.open_issues
+      }))
+
     return (
       <div className="App">
         <div className="App-header">
-          {/* <Logo /> */}
           <h2>List of React Css Library</h2>
         </div>
         <div>
             Based on <a href="https://github.com/MicheleBertoli/css-in-js">Michele Bertoli css-in-js list</a>
         </div>
         <div className="App-intro">
-          <table style={{borderSpacing:"15px"}}  >
-            <thead style={{textAlign:"left"}} >
-              <tr>
-                <th>Avatar</th>
-                <th>Name</th>
-                <th>Stars</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.values(this.state.reposInfo)
-                .sort((a,b) => {
-                  return  b.stargazers_count - a.stargazers_count
-                })
-                .map(repo => <Repo key={repo.full_name}  repo={repo} />   )}
-            </tbody>
-          </table>
+          <Table
+            sortable={['Stars', 'Issues']}
+            data={tableData}
+          />
         </div>
       </div>
     );
   }
 }
 
-const Repo = ({repo}) => {
-
-  if(!repo && !repo.name)
-    return (<tr><td>error</td></tr>)
-
-  return (
-    <tr>
-      <td>
-        <img height="40px" src={repo.owner && repo.owner.avatar_url} role="presentation" />
-      </td>
-      <td>
-        <a href={repo.html_url}>
-          {repo.name}
-        </a>
-      </td>
-      <td>
-      {repo.stargazers_count}
-      </td>
-    </tr>
-  )
-
-}
 export default App;
